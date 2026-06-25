@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projects — Codavo Solutions</title>
+<meta name="description" content="All projects by Codavo Solutions — web and desktop application development.">
+
+<!-- Google Fonts: Space Grotesk + Inter (EN) / Cairo + Tajawal (AR) + JetBrains Mono (code accents) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Cairo:wght@600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ CUSTOM CURSOR GLOW (desktop only, decorative) ============ -->
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+<!-- ============ NAVBAR ============ -->
+<header class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="logo" id="siteLogo">
+      <span class="logo-bracket">&lt;</span><span class="logo-name" id="siteLogoText">Codavo</span><span class="logo-bracket">/&gt;</span>
+    </a>
+
+    <nav class="nav-links" id="navLinks">
+      <!-- Rendered dynamically by main.js from data.js (siteUI.nav) -->
+    </nav>
+
+    <div class="navbar-actions">
+      <button class="icon-btn lang-toggle" id="langToggle" aria-label="Switch language" title="Switch language">
+        <span id="langToggleLabel">AR</span>
+      </button>
+      <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Switch theme" title="Switch theme">
+        <i class="fa-solid fa-moon" id="themeIcon"></i>
+      </button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ============ MOBILE NAV OVERLAY ============ -->
+<div class="mobile-nav" id="mobileNav">
+  <!-- Rendered dynamically by main.js from data.js (siteUI.nav) -->
+</div>
+
+<main>
+  <!-- ============ ALL PROJECTS HEADER ============ -->
+  <section class="section all-projects-hero">
+    <div class="container">
+      <a href="index.html" class="back-home-link" id="backHomeLink">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span id="backHomeLinkText">Back to Home</span>
+      </a>
+      <p class="section-eyebrow" id="allProjectsEyebrowText">Selected Work</p>
+      <h2 class="section-title" id="allProjectsTitleText">All Projects</h2>
+    </div>
+  </section>
+
+  <!-- ============ ALL PROJECTS GRID ============ -->
+  <section class="section all-projects">
+    <div class="container">
+      <div class="projects-grid" id="allProjectsGrid">
+        <!-- Project cards are rendered dynamically by main.js from data.js -->
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <p class="footer-copy">&copy; <span id="footerYear"></span> <span id="footerBrandNameText">Codavo Solutions</span>. <span id="footerRightsText">All rights reserved.</span></p>
+
+    <div class="social-links social-links--footer" id="footerSocialLinks">
+      <!-- Social links are rendered dynamically by main.js from data.js -->
+    </div>
+
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">
+      <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <a href="admin.html" class="admin-gear-link" aria-label="Admin" title="Admin">
+      <i class="fa-solid fa-gear"></i>
+    </a>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script src="main.js"></script>
+</body>
+</html>

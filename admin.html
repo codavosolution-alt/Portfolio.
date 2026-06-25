@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>لوحة التحكم — Codavo Solutions</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Cairo:wght@600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+  /* ============ TOKENS (reuses the public site's design language) ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Tajawal', 'Inter', sans-serif;
+    background: #FAFAF9;
+    color: #1A1D23;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  :root {
+    --bg: #FAFAF9; --bg-elevated: #FFFFFF; --bg-subtle: #F1F1EF;
+    --text-primary: #1A1D23; --text-secondary: #5B6472; --text-tertiary: #8A93A1;
+    --border: #E6E5E1; --border-strong: #D9D8D3;
+    --accent: #4F7CFF; --accent-2: #7C5CFF; --accent-soft: #EEF1FF;
+    --success: #1FAE6E; --danger: #E5484D; --warning: #F59E0B;
+    --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px;
+    --shadow-sm: 0 1px 3px rgba(20,22,30,0.06);
+    --shadow-md: 0 8px 24px rgba(20,22,30,0.08);
+    --font-mono: 'JetBrains Mono', monospace;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  [data-theme="dark"] {
+    --bg: #0B0E14; --bg-elevated: #12161F; --bg-subtle: #161B26;
+    --text-primary: #ECEEF1; --text-secondary: #9BA3B0; --text-tertiary: #6B7280;
+    --border: #232936; --border-strong: #2D3441;
+    --accent: #6E8BFF; --accent-2: #9B7CFF; --accent-soft: #1A2036;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  body { background: var(--bg); color: var(--text-primary); transition: background-color .3s var(--ease), color .3s var(--ease); }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; border: none; background: none; }
+  h1, h2, h3 { font-family: 'Cairo', 'Space Grotesk', sans-serif; font-weight: 700; }
+
+  /* ============ LOGIN GATE ============ */
+  #loginGate {
+    position: fixed; inset: 0; z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg); padding: 24px;
+  }
+  .login-card {
+    width: 100%; max-width: 380px;
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 36px 32px;
+    box-shadow: var(--shadow-md); text-align: center;
+  }
+  .login-icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; margin: 0 auto 18px;
+  }
+  .login-card h1 { font-size: 1.3rem; margin-bottom: 8px; }
+  .login-card p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 22px; }
+  .login-card input {
+    width: 100%; padding: 13px 16px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: var(--bg-subtle);
+    color: var(--text-primary); font-size: 0.95rem; margin-bottom: 12px;
+    text-align: center; letter-spacing: 2px;
+  }
+  .login-card input:focus { outline: none; border-color: var(--accent); }
+  .login-error { color: var(--danger); font-size: 0.85rem; min-height: 20px; margin-bottom: 8px; }
+  .login-hint { color: var(--text-tertiary); font-size: 0.78rem; margin-top: 16px; }
+
+  /* ============ APP SHELL ============ */
+  #adminApp { display: none; min-height: 100vh; }
+  #adminApp.show { display: flex; }
+
+  .admin-sidebar {
+    width: 260px; flex-shrink: 0;
+    background: var(--bg-elevated); border-inline-end: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .admin-logo {
+    padding: 22px 20px; border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono); font-weight: 600; font-size: 1.05rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .admin-logo i { color: var(--accent); }
+  .admin-nav { flex: 1; padding: 14px 12px; display: flex; flex-direction: column; gap: 3px; }
+  .admin-nav-btn {
+    display: flex; align-items: center; gap: 11px;
+    padding: 11px 14px; border-radius: var(--radius-sm);
+    color: var(--text-secondary); font-size: 0.92rem; font-weight: 500;
+    text-align: right; width: 100%;
+    transition: background-color .2s var(--ease), color .2s var(--ease);
+  }
+  .admin-nav-btn i { width: 18px; text-align: center; color: var(--text-tertiary); transition: color .2s var(--ease); }
+  .admin-nav-btn:hover { background: var(--bg-subtle); color: var(--text-primary); }
+  .admin-nav-btn.active { background: var(--accent-soft); color: var(--accent); }
+  .admin-nav-btn.active i { color: var(--accent); }
+
+  .admin-sidebar-foot { padding: 14px 12px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+
+  .admin-main { flex: 1; min-width: 0; padding: 32px 40px 80px; max-width: 980px; }
+  .admin-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px; gap: 16px; flex-wrap: wrap;
+  }
+  .admin-topbar h2 { font-size: 1.5rem; }
+  .admin-topbar p { color: var(--text-secondary); font-size: 0.88rem; margin-top: 4px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: var(--radius-sm);
+    font-weight: 600; font-size: 0.88rem;
+    transition: transform .2s var(--ease), box-shadow .2s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease);
+    white-space: nowrap;
+  }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; box-shadow: var(--shadow-sm); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .btn-outline { background: transparent; color: var(--text-primary); border: 1.5px solid var(--border-strong); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: transparent; color: var(--danger); border: 1.5px solid color-mix(in srgb, var(--danger) 40%, transparent); }
+  .btn-danger:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); }
+  .btn-sm { padding: 7px 13px; font-size: 0.8rem; }
+  .btn-full { width: 100%; justify-content: center; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
+
+  /* ============ PANELS / CARDS ============ */
+  .admin-panel { display: none; }
+  .admin-panel.active { display: block; animation: fadeIn .3s var(--ease); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .card {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 24px; margin-bottom: 18px;
+  }
+  .card h3 { font-size: 1.02rem; margin-bottom: 4px; display: flex; align-items: center; gap: 9px; }
+  .card h3 i { color: var(--accent); font-size: 0.95rem; }
+  .card .card-sub { color: var(--text-tertiary); font-size: 0.82rem; margin-bottom: 18px; }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.82rem; font-weight: 600; margin-bottom: 7px; color: var(--text-primary);
+  }
+  .field label .lang-tag {
+    font-family: var(--font-mono); font-size: 0.68rem; font-weight: 600;
+    color: var(--accent); background: var(--accent-soft);
+    padding: 1px 6px; border-radius: 4px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 11px 14px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: var(--bg-subtle);
+    color: var(--text-primary); font-family: inherit; font-size: 0.9rem;
+    transition: border-color .2s var(--ease);
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 72px; }
+  .field-hint { font-size: 0.74rem; color: var(--text-tertiary); margin-top: 5px; }
+
+  .stat-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  /* Repeatable item rows (services, skills, projects, experience) */
+  .repeatable-item {
+    border: 1px solid var(--border); border-radius: var(--radius-md);
+    padding: 18px; margin-bottom: 12px; position: relative; background: var(--bg-subtle);
+  }
+  .repeatable-item-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .repeatable-item-head .drag-num {
+    font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-tertiary);
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    padding: 3px 9px; border-radius: 999px;
+  }
+  .repeatable-item-actions { display: flex; gap: 6px; }
+  .icon-action-btn {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-tertiary); background: var(--bg-elevated);
+    border: 1px solid var(--border); font-size: 0.8rem;
+    transition: color .2s var(--ease), border-color .2s var(--ease);
+  }
+  .icon-action-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .icon-action-btn.danger:hover { color: var(--danger); border-color: var(--danger); }
+
+  .add-item-btn {
+    width: 100%; padding: 13px; border-radius: var(--radius-md);
+    border: 1.5px dashed var(--border-strong); color: var(--text-secondary);
+    font-size: 0.88rem; font-weight: 600; display: flex; align-items: center;
+    justify-content: center; gap: 8px;
+    transition: border-color .2s var(--ease), color .2s var(--ease), background-color .2s var(--ease);
+  }
+  .add-item-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+
+  .tags-input-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .tag-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    padding: 6px 8px 6px 12px; border-radius: 999px; font-size: 0.82rem;
+  }
+  .tag-chip button { color: var(--text-tertiary); width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+  .tag-chip button:hover { color: var(--danger); }
+
+  .icon-picker-preview {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: var(--radius-sm);
+    background: var(--accent-soft); color: var(--accent); font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .icon-field-row { display: flex; align-items: center; gap: 10px; }
+  .icon-field-row .field { flex: 1; margin-bottom: 0; }
+
+  .range-row { display: flex; align-items: center; gap: 14px; }
+  .range-row input[type="range"] { flex: 1; }
+  .range-value { font-family: var(--font-mono); font-size: 0.85rem; width: 44px; text-align: center; color: var(--accent); font-weight: 600; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 24px; inset-inline-start: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text-primary); color: var(--bg);
+    padding: 13px 22px; border-radius: 999px; font-size: 0.88rem; font-weight: 600;
+    box-shadow: var(--shadow-md); z-index: 3000; opacity: 0; pointer-events: none;
+    transition: opacity .3s var(--ease), transform .3s var(--ease);
+    display: flex; align-items: center; gap: 9px;
+  }
+  [dir="rtl"] #toast { transform: translateX(50%) translateY(20px); }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  [dir="rtl"] #toast.show { transform: translateX(50%) translateY(0); }
+  #toast i { color: var(--success); }
+  #toast.toast-error i { color: var(--danger); }
+
+  /* Sticky save bar */
+  .save-bar {
+    position: sticky; bottom: 0; margin-top: 24px;
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: var(--radius-md); padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: var(--shadow-md); flex-wrap: wrap; gap: 12px;
+  }
+  .save-bar-msg { font-size: 0.84rem; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+  .save-bar-msg i { color: var(--success); }
+
+  .theme-switch-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px; border-radius: var(--radius-sm); background: var(--bg-subtle);
+    font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 4px;
+  }
+
+  .empty-state {
+    text-align: center; padding: 30px 16px; color: var(--text-tertiary); font-size: 0.88rem;
+  }
+
+  /* Mobile */
+  .mobile-topbar { display: none; }
+  @media (max-width: 900px) {
+    .admin-sidebar {
+      position: fixed; inset-inline-start: 0; top: 0; height: 100vh;
+      transform: translateX(-110%); transition: transform .3s var(--ease); z-index: 1500;
+    }
+    [dir="rtl"] .admin-sidebar { transform: translateX(110%); }
+    .admin-sidebar.open { transform: translateX(0); }
+    .admin-main { padding: 20px 18px 80px; }
+    .mobile-topbar {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 18px; border-bottom: 1px solid var(--border);
+      background: var(--bg-elevated); position: sticky; top: 0; z-index: 100;
+    }
+    .field-row, .stat-fields { grid-template-columns: 1fr; }
+    .sidebar-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 1400;
+      opacity: 0; pointer-events: none; transition: opacity .3s var(--ease);
+    }
+    .sidebar-overlay.show { opacity: 1; pointer-events: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN GATE ============ -->
+<div id="loginGate">
+  <div class="login-card">
+    <div class="login-icon"><i class="fa-solid fa-lock"></i></div>
+    <h1>لوحة التحكم</h1>
+    <p>أدخل كلمة المرور للوصول إلى إدارة محتوى الموقع</p>
+    <form id="loginForm">
+      <input type="password" id="adminPassword" placeholder="••••••••" autocomplete="off" autofocus>
+      <div class="login-error" id="loginError"></div>
+      <button type="submit" class="btn btn-primary btn-full">
+        <i class="fa-solid fa-arrow-left-to-bracket"></i> دخول
+      </button>
+    </form>
+    <p class="login-hint">كلمة المرور الافتراضية: <strong>admin123</strong> — يمكنك تغييرها من داخل اللوحة بعد الدخول.</p>
+    <p class="login-hint"><a href="index.html"><i class="fa-solid fa-arrow-right"></i> الرجوع للموقع</a></p>
+  </div>
+</div>
+
+<!-- ============ ADMIN APP SHELL ============ -->
+<div id="adminApp">
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="admin-logo"><i class="fa-solid fa-gear"></i> لوحة التحكم</div>
+
+    <nav class="admin-nav" id="adminNav">
+      <button class="admin-nav-btn active" data-panel="overview"><i class="fa-solid fa-house"></i> نظرة عامة</button>
+      <button class="admin-nav-btn" data-panel="appearance"><i class="fa-solid fa-palette"></i> الشكل العام والشعار</button>
+      <button class="admin-nav-btn" data-panel="profile"><i class="fa-solid fa-user"></i> الملف الشخصي</button>
+      <button class="admin-nav-btn" data-panel="contact"><i class="fa-solid fa-address-book"></i> التواصل والروابط</button>
+      <button class="admin-nav-btn" data-panel="services"><i class="fa-solid fa-briefcase"></i> الخدمات</button>
+      <button class="admin-nav-btn" data-panel="skills"><i class="fa-solid fa-chart-simple"></i> المهارات</button>
+      <button class="admin-nav-btn" data-panel="projects"><i class="fa-solid fa-diagram-project"></i> المشاريع</button>
+      <button class="admin-nav-btn" data-panel="experience"><i class="fa-solid fa-timeline"></i> الخبرة</button>
+      <button class="admin-nav-btn" data-panel="texts"><i class="fa-solid fa-font"></i> كل النصوص والأزرار</button>
+      <button class="admin-nav-btn" data-panel="settings"><i class="fa-solid fa-sliders"></i> الإعدادات</button>
+    </nav>
+
+    <div class="admin-sidebar-foot">
+      <div class="theme-switch-row">
+        <span><i class="fa-solid fa-moon"></i> الوضع الليلي</span>
+        <input type="checkbox" id="adminThemeToggle">
+      </div>
+      <a href="index.html" target="_blank" class="btn btn-outline btn-full btn-sm"><i class="fa-solid fa-arrow-up-right-from-square"></i> فتح الموقع</a>
+      <button class="btn btn-outline btn-full btn-sm" id="logoutBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i> تسجيل الخروج</button>
+    </div>
+  </aside>
+
+  <div class="mobile-topbar">
+    <button id="mobileSidebarToggle" class="icon-action-btn" style="width:38px;height:38px;"><i class="fa-solid fa-bars"></i></button>
+    <strong>لوحة التحكم</strong>
+  </div>
+
+  <main class="admin-main">
+
+    <!-- ===== OVERVIEW ===== -->
+    <section class="admin-panel active" data-panel="overview">
+      <div class="admin-topbar">
+        <div>
+          <h2>نظرة عامة</h2>
+          <p>تحكم كامل في محتوى البورتفوليو الخاص بك من هنا.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-circle-info"></i> كيف تعمل اللوحة؟</h3>
+        <p class="card-sub" style="margin-bottom:0;">
+          كل تعديل تحفظه هنا يُخزَّن في متصفحك الحالي فقط (localStorage)، ويظهر فورًا في موقعك عند فتحه من هذا الجهاز.
+          لإظهار التعديلات لكل زوار موقعك بعد رفعه على GitHub Pages، اضغط "تصدير ملف البيانات" من الإعدادات،
+          ثم استبدل ملف data.js في مستودع GitHub بالملف الجديد ورفعه (Commit). هذه هي الطريقة الوحيدة
+          لجعل التغييرات تظهر لكل الزوار، لأن الموقع بدون قاعدة بيانات حقيقية.
+        </p>
+      </div>
+
+      <div class="card" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;">
+        <div>
+          <h3 style="margin-bottom:0;"><i class="fa-solid fa-file-export"></i> تصدير سريع</h3>
+          <p class="card-sub" style="margin-bottom:0;">نزّل ملف data.js المحدث برضاك الحالي.</p>
+        </div>
+        <button class="btn btn-primary" id="quickExportBtn"><i class="fa-solid fa-download"></i> تصدير data.js</button>
+      </div>
+
+      <div class="field-row" style="margin-top:18px;">
+        <div class="card" style="text-align:center;">
+          <div style="font-size:1.8rem; font-weight:700; font-family:'Space Grotesk',sans-serif;" id="overviewProjectsCount">0</div>
+          <div class="card-sub" style="margin:4px 0 0;">مشاريع</div>
+        </div>
+        <div class="card" style="text-align:center;">
+          <div style="font-size:1.8rem; font-weight:700; font-family:'Space Grotesk',sans-serif;" id="overviewServicesCount">0</div>
+          <div class="card-sub" style="margin:4px 0 0;">خدمات</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== APPEARANCE (Logo / Brand / Navbar) ===== -->
+    <section class="admin-panel" data-panel="appearance">
+      <div class="admin-topbar">
+        <div><h2>الشكل العام والشعار</h2><p>اسم الموقع، الشعار، وروابط القائمة العلوية (Navbar).</p></div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-image"></i> الشعار (Logo)</h3>
+        <p class="card-sub">رفع صورة شعار يحلّ محل الاسم النصي تلقائيًا في القائمة العلوية. اتركه فاضي لاستخدام الاسم النصي مع رمز &lt; /&gt;.</p>
+        <div class="field-row">
+          <div class="field">
+            <label>رفع صورة شعار</label>
+            <input type="file" id="brand_logoImageFile" accept="image/*">
+            <span class="field-hint">يُفضّل صورة مربعة أو مستطيلة صغيرة بخلفية شفافة (PNG).</span>
+          </div>
+          <div class="field">
+            <label>أو رابط صورة شعار مباشر</label>
+            <input type="url" id="brand_logoImageUrl" placeholder="https://example.com/logo.png">
+          </div>
+        </div>
+        <div class="field-row" style="align-items:center;">
+          <div class="icon-field-row" style="margin-bottom:14px;">
+            <span class="icon-picker-preview" id="brand_logoPreviewWrap" style="width:auto;min-width:54px;height:140px;max-width:280px;padding:8px;border-radius:10px;overflow:hidden;background:var(--bg-subtle);border:1px solid var(--border);">
+              <img id="brand_logoPreviewImg" style="width:100%;height:100%;object-fit:contain;display:none;">
+            </span>
+            <button class="btn btn-outline btn-sm" id="brand_clearLogoBtn" type="button"><i class="fa-solid fa-trash"></i> إزالة الشعار والرجوع للاسم النصي</button>
+          </div>
+        </div>
+        <div class="field">
+          <label><i class="fa-solid fa-up-right-and-down-left-from-center"></i> حجم صورة الشعار في القائمة العلوية (الارتفاع بالبكسل)</label>
+          <div class="range-row">
+            <input type="range" min="18" max="120" id="brand_logoSize" value="32">
+            <span class="range-value" id="brand_logoSizeValue">32px</span>
+          </div>
+          <span class="field-hint">يتحكم في ارتفاع صورة الشعار فقط. العرض يتمدد تلقائيًا حسب أبعاد الصورة.</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-signature"></i> اسم الموقع (يظهر بجوار الشعار لو مفيش صورة)</h3>
+        <div class="field"><label>الاسم المختصر في القائمة العلوية</label><input type="text" id="brand_logoText" placeholder="Codavo Solutions"></div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-window-restore"></i> عنوان تبويب المتصفح (Page Title)</h3>
+        <div class="field-row">
+          <div class="field"><label>العنوان <span class="lang-tag">EN</span></label><input type="text" id="brand_siteTitle_en"></div>
+          <div class="field"><label>العنوان <span class="lang-tag">AR</span></label><input type="text" id="brand_siteTitle_ar"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-bars"></i> روابط القائمة العلوية (Navbar)</h3>
+        <p class="card-sub">عدّل نص كل رابط بالعربي والإنجليزي. الترتيب والوجهة (القسم) ثابتان، النص فقط قابل للتعديل.</p>
+        <div class="field-row">
+          <div class="field"><label>الرئيسية (Home) <span class="lang-tag">EN</span></label><input type="text" id="nav_home_en"></div>
+          <div class="field"><label>الرئيسية (Home) <span class="lang-tag">AR</span></label><input type="text" id="nav_home_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>نبذة عنا (About) <span class="lang-tag">EN</span></label><input type="text" id="nav_about_en"></div>
+          <div class="field"><label>نبذة عنا (About) <span class="lang-tag">AR</span></label><input type="text" id="nav_about_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>المهارات (Skills) <span class="lang-tag">EN</span></label><input type="text" id="nav_skills_en"></div>
+          <div class="field"><label>المهارات (Skills) <span class="lang-tag">AR</span></label><input type="text" id="nav_skills_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>الخدمات (Services) <span class="lang-tag">EN</span></label><input type="text" id="nav_services_en"></div>
+          <div class="field"><label>الخدمات (Services) <span class="lang-tag">AR</span></label><input type="text" id="nav_services_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>المشاريع (Projects) <span class="lang-tag">EN</span></label><input type="text" id="nav_projects_en"></div>
+          <div class="field"><label>المشاريع (Projects) <span class="lang-tag">AR</span></label><input type="text" id="nav_projects_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>الخبرة (Experience) <span class="lang-tag">EN</span></label><input type="text" id="nav_experience_en"></div>
+          <div class="field"><label>الخبرة (Experience) <span class="lang-tag">AR</span></label><input type="text" id="nav_experience_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>تواصل معي (Contact) <span class="lang-tag">EN</span></label><input type="text" id="nav_contact_en"></div>
+          <div class="field"><label>تواصل معي (Contact) <span class="lang-tag">AR</span></label><input type="text" id="nav_contact_ar"></div>
+        </div>
+      </div>
+
+      <div class="save-bar">
+        <span class="save-bar-msg"><i class="fa-solid fa-circle-check"></i> جاهز للحفظ</span>
+        <button class="btn btn-primary" id="saveAppearanceBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ التغييرات</button>
+      </div>
+    </section>
+
+    <!-- ===== PROFILE ===== -->
+    <section class="admin-panel" data-panel="profile">
+      <div class="admin-topbar">
+        <div><h2>الملف الشخصي</h2><p>النصوص الرئيسية التي تظهر في Hero وقسم About.</p></div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-signature"></i> الاسم والمسمى الوظيفي</h3>
+        <p class="card-sub">يظهر هذا في أعلى الصفحة الرئيسية (Hero).</p>
+        <div class="field-row">
+          <div class="field"><label>الاسم <span class="lang-tag">EN</span></label><input type="text" id="p_name_en"></div>
+          <div class="field"><label>الاسم <span class="lang-tag">AR</span></label><input type="text" id="p_name_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>المسمى الوظيفي <span class="lang-tag">EN</span></label><input type="text" id="p_role_en"></div>
+          <div class="field"><label>المسمى الوظيفي <span class="lang-tag">AR</span></label><input type="text" id="p_role_ar"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-align-right"></i> وصف Hero</h3>
+        <div class="field"><label>الوصف <span class="lang-tag">EN</span></label><textarea id="p_heroDesc_en"></textarea></div>
+        <div class="field"><label>الوصف <span class="lang-tag">AR</span></label><textarea id="p_heroDesc_ar"></textarea></div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-user-pen"></i> نص About Me</h3>
+        <div class="field"><label>الفقرة الأولى <span class="lang-tag">EN</span></label><textarea id="p_aboutP1_en"></textarea></div>
+        <div class="field"><label>الفقرة الأولى <span class="lang-tag">AR</span></label><textarea id="p_aboutP1_ar"></textarea></div>
+        <div class="field"><label>الفقرة الثانية <span class="lang-tag">EN</span></label><textarea id="p_aboutP2_en"></textarea></div>
+        <div class="field"><label>الفقرة الثانية <span class="lang-tag">AR</span></label><textarea id="p_aboutP2_ar"></textarea></div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-chart-simple"></i> الإحصائيات (Hero Stats)</h3>
+        <div class="stat-fields">
+          <div class="field"><label>عدد المشاريع</label><input type="number" id="p_statProjects" min="0"></div>
+          <div class="field"><label>سنوات الخبرة</label><input type="number" id="p_statYears" min="0"></div>
+          <div class="field"><label>نسبة رضا العملاء %</label><input type="number" id="p_statSatisfaction" min="0" max="100"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-file-pdf"></i> رابط السيرة الذاتية (CV)</h3>
+        <p class="card-sub">ضع رابط مباشر لملف PDF (مثلاً من Google Drive أو GitHub). اتركه فاضي لو لسه مش جاهز.</p>
+        <div class="field"><input type="url" id="p_cvUrl" placeholder="https://example.com/cv.pdf"></div>
+      </div>
+
+      <div class="save-bar">
+        <span class="save-bar-msg"><i class="fa-solid fa-circle-check"></i> التغييرات تُحفظ في هذا المتصفح فقط حتى تضغط حفظ</span>
+        <button class="btn btn-primary" id="saveProfileBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ التغييرات</button>
+      </div>
+    </section>
+
+    <!-- ===== CONTACT ===== -->
+    <section class="admin-panel" data-panel="contact">
+      <div class="admin-topbar">
+        <div><h2>التواصل والروابط</h2><p>بيانات التواصل وروابط السوشيال ميديا التي تظهر في الموقع.</p></div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-envelope"></i> بيانات التواصل المباشر</h3>
+        <div class="field"><label>البريد الإلكتروني</label><input type="email" id="c_email"></div>
+        <div class="field"><label>رقم الهاتف</label><input type="text" id="c_phone" placeholder="+20 100 000 0000"></div>
+        <div class="field"><label>رقم واتساب (أرقام فقط مع كود الدولة)</label><input type="text" id="c_whatsapp" placeholder="201000000000"></div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-share-nodes"></i> روابط السوشيال ميديا</h3>
+        <p class="card-sub">اتركها فاضية لإخفاء أي رابط لا تستخدمه.</p>
+        <div class="field"><label><i class="fa-brands fa-github"></i> GitHub</label><input type="url" id="c_github" placeholder="https://github.com/username"></div>
+        <div class="field"><label><i class="fa-brands fa-linkedin"></i> LinkedIn</label><input type="url" id="c_linkedin" placeholder="https://linkedin.com/in/username"></div>
+        <div class="field"><label><i class="fa-brands fa-facebook"></i> Facebook</label><input type="url" id="c_facebook" placeholder="https://facebook.com/username"></div>
+        <div class="field"><label><i class="fa-brands fa-behance"></i> Behance</label><input type="url" id="c_behance" placeholder="https://behance.net/username"></div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-paper-plane"></i> تفعيل نموذج التواصل (إرسال إيميل فعلي)</h3>
+        <p class="card-sub">
+          نموذج "تواصل معنا" في الموقع يحتاج "Access Key" مجاني من خدمة Web3Forms ليبعت رسائل الزوار فعليًا
+          على بريدكم الإلكتروني. بدون هذا المفتاح، الفورم سيظهر رسالة للزائر تطلب التواصل عبر البريد أو واتساب مباشرة بدلًا من الإرسال.
+        </p>
+        <ol style="margin: 0 0 16px; padding-inline-start: 20px; color: var(--text-secondary); font-size: 0.88rem; line-height: 1.8;">
+          <li>افتح <a href="https://web3forms.com" target="_blank" rel="noopener" style="color:var(--accent); font-weight:600;">web3forms.com</a> في تاب جديد.</li>
+          <li>اكتب بريد الشركة (مثل <code>hello@codavosolutions.com</code>) واضغط "Create Access Key".</li>
+          <li>هيوصلك الـ Access Key على نفس البريد — انسخه واحفظه هنا تحت.</li>
+          <li>اضغط "حفظ التغييرات"، وبعد كده أي رسالة من الفورم هتوصل مباشرة على بريد الشركة.</li>
+        </ol>
+        <div class="field">
+          <label>Web3Forms Access Key</label>
+          <input type="text" id="c_web3formsKey" placeholder="مثال: a1b2c3d4-e5f6-7890-g1h2-i3j4k5l6m7n8">
+          <span class="field-hint">مجاني بالكامل حتى 250 رسالة شهريًا. لا حاجة لأي باك إند أو سيرفر إضافي.</span>
+        </div>
+      </div>
+
+      <div class="save-bar">
+        <span class="save-bar-msg"><i class="fa-solid fa-circle-check"></i> جاهز للحفظ</span>
+        <button class="btn btn-primary" id="saveContactBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ التغييرات</button>
+      </div>
+    </section>
+
+    <!-- ===== SERVICES ===== -->
+    <section class="admin-panel" data-panel="services">
+      <div class="admin-topbar">
+        <div><h2>الخدمات</h2><p>الخدمات التي تعرضها في قسم Services.</p></div>
+        <button class="btn btn-outline btn-sm" id="saveServicesBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+      </div>
+      <div id="servicesList"></div>
+      <button class="add-item-btn" id="addServiceBtn"><i class="fa-solid fa-plus"></i> إضافة خدمة جديدة</button>
+    </section>
+
+    <!-- ===== SKILLS ===== -->
+    <section class="admin-panel" data-panel="skills">
+      <div class="admin-topbar">
+        <div><h2>المهارات</h2><p>مهاراتك مقسّمة حسب الفئة، مع نسبة لكل مهارة.</p></div>
+        <button class="btn btn-outline btn-sm" id="saveSkillsBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-display"></i> Frontend</h3>
+        <div id="skillsList_frontend"></div>
+        <button class="add-item-btn" data-group="frontend"><i class="fa-solid fa-plus"></i> إضافة مهارة</button>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-server"></i> Backend</h3>
+        <div id="skillsList_backend"></div>
+        <button class="add-item-btn" data-group="backend"><i class="fa-solid fa-plus"></i> إضافة مهارة</button>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-desktop"></i> Desktop Applications</h3>
+        <div id="skillsList_desktop"></div>
+        <button class="add-item-btn" data-group="desktop"><i class="fa-solid fa-plus"></i> إضافة مهارة</button>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-wrench"></i> الأدوات (Tools)</h3>
+        <p class="card-sub">اكتب اسم الأداة واضغط Enter لإضافتها.</p>
+        <div class="tags-input-list" id="toolsTagsList"></div>
+        <input type="text" id="toolsInput" placeholder="مثال: Postman">
+      </div>
+    </section>
+
+    <!-- ===== PROJECTS ===== -->
+    <section class="admin-panel" data-panel="projects">
+      <div class="admin-topbar">
+        <div><h2>المشاريع</h2><p>أعمالك التي تظهر في قسم Projects.</p></div>
+        <button class="btn btn-outline btn-sm" id="saveProjectsBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+      </div>
+      <div id="projectsList"></div>
+      <button class="add-item-btn" id="addProjectBtn"><i class="fa-solid fa-plus"></i> إضافة مشروع جديد</button>
+    </section>
+
+    <!-- ===== EXPERIENCE ===== -->
+    <section class="admin-panel" data-panel="experience">
+      <div class="admin-topbar">
+        <div><h2>الخبرة (Timeline)</h2><p>محطات رحلتك المهنية، بالترتيب الذي ستظهر به.</p></div>
+        <button class="btn btn-outline btn-sm" id="saveExperienceBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+      </div>
+      <div id="experienceList"></div>
+      <button class="add-item-btn" id="addExperienceBtn"><i class="fa-solid fa-plus"></i> إضافة محطة جديدة</button>
+    </section>
+
+    <!-- ===== ALL OTHER TEXTS / BUTTONS ===== -->
+    <section class="admin-panel" data-panel="texts">
+      <div class="admin-topbar">
+        <div><h2>كل النصوص والأزرار</h2><p>كل كلمة متبقية في الموقع — عناوين الأقسام، الأزرار، الفورم، والفوتر.</p></div>
+        <button class="btn btn-outline btn-sm" id="saveTextsBtn"><i class="fa-solid fa-floppy-disk"></i> حفظ</button>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-house"></i> أزرار وشريط Hero</h3>
+        <div class="field-row">
+          <div class="field"><label>شارة "متاح للعمل" <span class="lang-tag">EN</span></label><input type="text" id="ui_hero_eyebrow_en"></div>
+          <div class="field"><label>شارة "متاح للعمل" <span class="lang-tag">AR</span></label><input type="text" id="ui_hero_eyebrow_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>كلمة الترحيب (قبل الاسم) <span class="lang-tag">EN</span></label><input type="text" id="ui_hero_greeting_en"></div>
+          <div class="field"><label>كلمة الترحيب (قبل الاسم) <span class="lang-tag">AR</span></label><input type="text" id="ui_hero_greeting_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>زر "شاهد أعمالنا" <span class="lang-tag">EN</span></label><input type="text" id="ui_hero_btnWork_en"></div>
+          <div class="field"><label>زر "شاهد أعمالنا" <span class="lang-tag">AR</span></label><input type="text" id="ui_hero_btnWork_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>زر "تواصل معنا" <span class="lang-tag">EN</span></label><input type="text" id="ui_hero_btnContact_en"></div>
+          <div class="field"><label>زر "تواصل معنا" <span class="lang-tag">AR</span></label><input type="text" id="ui_hero_btnContact_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>زر "تحميل الملف التعريفي" <span class="lang-tag">EN</span></label><input type="text" id="ui_hero_btnCv_en"></div>
+          <div class="field"><label>زر "تحميل الملف التعريفي" <span class="lang-tag">AR</span></label><input type="text" id="ui_hero_btnCv_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>تسمية إحصائية المشاريع <span class="lang-tag">EN</span></label><input type="text" id="ui_hero_statProjectsLabel_en"></div>
+          <div class="field"><label>تسمية إحصائية المشاريع <span class="lang-tag">AR</span></label><input type="text" id="ui_hero_statProjectsLabel_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>تسمية إحصائية سنوات الخبرة <span class="lang-tag">EN</span></label><input type="text" id="ui_hero_statYearsLabel_en"></div>
+          <div class="field"><label>تسمية إحصائية سنوات الخبرة <span class="lang-tag">AR</span></label><input type="text" id="ui_hero_statYearsLabel_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>تسمية إحصائية رضا العملاء <span class="lang-tag">EN</span></label><input type="text" id="ui_hero_statSatisfactionLabel_en"></div>
+          <div class="field"><label>تسمية إحصائية رضا العملاء <span class="lang-tag">AR</span></label><input type="text" id="ui_hero_statSatisfactionLabel_ar"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-heading"></i> عناوين الأقسام (Eyebrow + Title)</h3>
+        <p class="card-sub">كل قسم له سطر صغير علوي (Eyebrow) وعنوان أساسي (Title).</p>
+
+        <div class="field-row">
+          <div class="field"><label>About — Eyebrow <span class="lang-tag">EN</span></label><input type="text" id="ui_st_aboutEyebrow_en"></div>
+          <div class="field"><label>About — Eyebrow <span class="lang-tag">AR</span></label><input type="text" id="ui_st_aboutEyebrow_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>About — Title <span class="lang-tag">EN</span></label><input type="text" id="ui_st_aboutTitle_en"></div>
+          <div class="field"><label>About — Title <span class="lang-tag">AR</span></label><input type="text" id="ui_st_aboutTitle_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Skills — Eyebrow <span class="lang-tag">EN</span></label><input type="text" id="ui_st_skillsEyebrow_en"></div>
+          <div class="field"><label>Skills — Eyebrow <span class="lang-tag">AR</span></label><input type="text" id="ui_st_skillsEyebrow_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Skills — Title <span class="lang-tag">EN</span></label><input type="text" id="ui_st_skillsTitle_en"></div>
+          <div class="field"><label>Skills — Title <span class="lang-tag">AR</span></label><input type="text" id="ui_st_skillsTitle_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Services — Eyebrow <span class="lang-tag">EN</span></label><input type="text" id="ui_st_servicesEyebrow_en"></div>
+          <div class="field"><label>Services — Eyebrow <span class="lang-tag">AR</span></label><input type="text" id="ui_st_servicesEyebrow_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Services — Title <span class="lang-tag">EN</span></label><input type="text" id="ui_st_servicesTitle_en"></div>
+          <div class="field"><label>Services — Title <span class="lang-tag">AR</span></label><input type="text" id="ui_st_servicesTitle_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Projects — Eyebrow <span class="lang-tag">EN</span></label><input type="text" id="ui_st_projectsEyebrow_en"></div>
+          <div class="field"><label>Projects — Eyebrow <span class="lang-tag">AR</span></label><input type="text" id="ui_st_projectsEyebrow_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Projects — Title <span class="lang-tag">EN</span></label><input type="text" id="ui_st_projectsTitle_en"></div>
+          <div class="field"><label>Projects — Title <span class="lang-tag">AR</span></label><input type="text" id="ui_st_projectsTitle_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Experience — Eyebrow <span class="lang-tag">EN</span></label><input type="text" id="ui_st_experienceEyebrow_en"></div>
+          <div class="field"><label>Experience — Eyebrow <span class="lang-tag">AR</span></label><input type="text" id="ui_st_experienceEyebrow_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Experience — Title <span class="lang-tag">EN</span></label><input type="text" id="ui_st_experienceTitle_en"></div>
+          <div class="field"><label>Experience — Title <span class="lang-tag">AR</span></label><input type="text" id="ui_st_experienceTitle_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Contact — Eyebrow <span class="lang-tag">EN</span></label><input type="text" id="ui_st_contactEyebrow_en"></div>
+          <div class="field"><label>Contact — Eyebrow <span class="lang-tag">AR</span></label><input type="text" id="ui_st_contactEyebrow_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Contact — Title <span class="lang-tag">EN</span></label><input type="text" id="ui_st_contactTitle_en"></div>
+          <div class="field"><label>Contact — Title <span class="lang-tag">AR</span></label><input type="text" id="ui_st_contactTitle_ar"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-id-card"></i> كروت About الأربعة</h3>
+        <div class="field-row">
+          <div class="field"><label>كارت 1 — العنوان <span class="lang-tag">EN</span></label><input type="text" id="ui_ab_card1Title_en"></div>
+          <div class="field"><label>كارت 1 — العنوان <span class="lang-tag">AR</span></label><input type="text" id="ui_ab_card1Title_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>كارت 1 — الوصف <span class="lang-tag">EN</span></label><input type="text" id="ui_ab_card1Desc_en"></div>
+          <div class="field"><label>كارت 1 — الوصف <span class="lang-tag">AR</span></label><input type="text" id="ui_ab_card1Desc_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>كارت 2 — العنوان <span class="lang-tag">EN</span></label><input type="text" id="ui_ab_card2Title_en"></div>
+          <div class="field"><label>كارت 2 — العنوان <span class="lang-tag">AR</span></label><input type="text" id="ui_ab_card2Title_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>كارت 2 — الوصف <span class="lang-tag">EN</span></label><input type="text" id="ui_ab_card2Desc_en"></div>
+          <div class="field"><label>كارت 2 — الوصف <span class="lang-tag">AR</span></label><input type="text" id="ui_ab_card2Desc_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>كارت 3 — العنوان <span class="lang-tag">EN</span></label><input type="text" id="ui_ab_card3Title_en"></div>
+          <div class="field"><label>كارت 3 — العنوان <span class="lang-tag">AR</span></label><input type="text" id="ui_ab_card3Title_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>كارت 3 — الوصف <span class="lang-tag">EN</span></label><input type="text" id="ui_ab_card3Desc_en"></div>
+          <div class="field"><label>كارت 3 — الوصف <span class="lang-tag">AR</span></label><input type="text" id="ui_ab_card3Desc_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>كارت 4 — العنوان <span class="lang-tag">EN</span></label><input type="text" id="ui_ab_card4Title_en"></div>
+          <div class="field"><label>كارت 4 — العنوان <span class="lang-tag">AR</span></label><input type="text" id="ui_ab_card4Title_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>كارت 4 — الوصف <span class="lang-tag">EN</span></label><input type="text" id="ui_ab_card4Desc_en"></div>
+          <div class="field"><label>كارت 4 — الوصف <span class="lang-tag">AR</span></label><input type="text" id="ui_ab_card4Desc_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>دور التوقيع (Signature Role) <span class="lang-tag">EN</span></label><input type="text" id="ui_ab_signatureRole_en"></div>
+          <div class="field"><label>دور التوقيع (Signature Role) <span class="lang-tag">AR</span></label><input type="text" id="ui_ab_signatureRole_ar"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-microchip"></i> تسميات قسم المهارات (Skills)</h3>
+        <div class="field-row">
+          <div class="field"><label>Frontend <span class="lang-tag">EN</span></label><input type="text" id="ui_sk_frontend_en"></div>
+          <div class="field"><label>Frontend <span class="lang-tag">AR</span></label><input type="text" id="ui_sk_frontend_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Backend <span class="lang-tag">EN</span></label><input type="text" id="ui_sk_backend_en"></div>
+          <div class="field"><label>Backend <span class="lang-tag">AR</span></label><input type="text" id="ui_sk_backend_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Desktop Applications <span class="lang-tag">EN</span></label><input type="text" id="ui_sk_desktop_en"></div>
+          <div class="field"><label>Desktop Applications <span class="lang-tag">AR</span></label><input type="text" id="ui_sk_desktop_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Tools <span class="lang-tag">EN</span></label><input type="text" id="ui_sk_tools_en"></div>
+          <div class="field"><label>Tools <span class="lang-tag">AR</span></label><input type="text" id="ui_sk_tools_ar"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-diagram-project"></i> أزرار المشاريع</h3>
+        <div class="field-row">
+          <div class="field"><label>زر "Live Demo" <span class="lang-tag">EN</span></label><input type="text" id="ui_pr_liveDemo_en"></div>
+          <div class="field"><label>زر "Live Demo" <span class="lang-tag">AR</span></label><input type="text" id="ui_pr_liveDemo_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>زر "عرض المزيد من المشاريع" <span class="lang-tag">EN</span></label><input type="text" id="ui_pr_viewMore_en"></div>
+          <div class="field"><label>زر "عرض المزيد من المشاريع" <span class="lang-tag">AR</span></label><input type="text" id="ui_pr_viewMore_ar"></div>
+        </div>
+        <p class="card-sub" style="margin-top:8px;">هذا الزر يظهر تلقائيًا في الصفحة الرئيسية فقط لو عدد مشاريعك أكثر من 4، ويأخذ الزائر إلى صفحة كل المشاريع.</p>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-envelope-open-text"></i> نموذج التواصل (Contact Form)</h3>
+        <div class="field-row">
+          <div class="field"><label>نص الترحيب <span class="lang-tag">EN</span></label><input type="text" id="ui_cf_lead_en"></div>
+          <div class="field"><label>نص الترحيب <span class="lang-tag">AR</span></label><input type="text" id="ui_cf_lead_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>تسمية حقل الاسم <span class="lang-tag">EN</span></label><input type="text" id="ui_cf_nameField_en"></div>
+          <div class="field"><label>تسمية حقل الاسم <span class="lang-tag">AR</span></label><input type="text" id="ui_cf_nameField_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>تسمية حقل البريد <span class="lang-tag">EN</span></label><input type="text" id="ui_cf_emailField_en"></div>
+          <div class="field"><label>تسمية حقل البريد <span class="lang-tag">AR</span></label><input type="text" id="ui_cf_emailField_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>تسمية حقل الموضوع <span class="lang-tag">EN</span></label><input type="text" id="ui_cf_subjectField_en"></div>
+          <div class="field"><label>تسمية حقل الموضوع <span class="lang-tag">AR</span></label><input type="text" id="ui_cf_subjectField_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>تسمية حقل الرسالة <span class="lang-tag">EN</span></label><input type="text" id="ui_cf_messageField_en"></div>
+          <div class="field"><label>تسمية حقل الرسالة <span class="lang-tag">AR</span></label><input type="text" id="ui_cf_messageField_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>زر الإرسال <span class="lang-tag">EN</span></label><input type="text" id="ui_cf_sendBtn_en"></div>
+          <div class="field"><label>زر الإرسال <span class="lang-tag">AR</span></label><input type="text" id="ui_cf_sendBtn_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>رسالة النجاح <span class="lang-tag">EN</span></label><input type="text" id="ui_cf_successMsg_en"></div>
+          <div class="field"><label>رسالة النجاح <span class="lang-tag">AR</span></label><input type="text" id="ui_cf_successMsg_ar"></div>
+        </div>
+        <p class="card-sub" style="margin-top:14px;">تسميات أيقونات البريد/الهاتف/واتساب في قسم التواصل:</p>
+        <div class="field-row">
+          <div class="field"><label>Email <span class="lang-tag">EN</span></label><input type="text" id="ui_cf_emailLabel_en"></div>
+          <div class="field"><label>Email <span class="lang-tag">AR</span></label><input type="text" id="ui_cf_emailLabel_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Phone <span class="lang-tag">EN</span></label><input type="text" id="ui_cf_phoneLabel_en"></div>
+          <div class="field"><label>Phone <span class="lang-tag">AR</span></label><input type="text" id="ui_cf_phoneLabel_ar"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>WhatsApp <span class="lang-tag">EN</span></label><input type="text" id="ui_cf_whatsappLabel_en"></div>
+          <div class="field"><label>WhatsApp <span class="lang-tag">AR</span></label><input type="text" id="ui_cf_whatsappLabel_ar"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-shoe-prints"></i> الفوتر</h3>
+        <div class="field-row">
+          <div class="field"><label>"جميع الحقوق محفوظة" <span class="lang-tag">EN</span></label><input type="text" id="ui_ft_rights_en"></div>
+          <div class="field"><label>"جميع الحقوق محفوظة" <span class="lang-tag">AR</span></label><input type="text" id="ui_ft_rights_ar"></div>
+        </div>
+      </div>
+
+      <div class="save-bar">
+        <span class="save-bar-msg"><i class="fa-solid fa-circle-check"></i> جاهز للحفظ</span>
+        <button class="btn btn-primary" id="saveTextsBtn2"><i class="fa-solid fa-floppy-disk"></i> حفظ كل النصوص</button>
+      </div>
+    </section>
+
+    <!-- ===== SETTINGS ===== -->
+    <section class="admin-panel" data-panel="settings">
+      <div class="admin-topbar">
+        <div><h2>الإعدادات</h2><p>النسخ الاحتياطي، الاستيراد، وكلمة المرور.</p></div>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-file-export"></i> تصدير البيانات (لازم لنشر التغييرات على الموقع الفعلي)</h3>
+        <p class="card-sub">
+          هذا الملف هو ما يحدد محتوى موقعك. نزّله، ثم استبدل به ملف data.js الموجود في مستودع GitHub الخاص بك، وارفعه (Commit &amp; Push).
+        </p>
+        <button class="btn btn-primary" id="exportDataBtn"><i class="fa-solid fa-download"></i> تصدير data.js</button>
+        <button class="btn btn-outline" id="exportJsonBtn" style="margin-inline-start:8px;"><i class="fa-solid fa-file-code"></i> تصدير نسخة JSON احتياطية</button>
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-file-import"></i> استيراد نسخة احتياطية (JSON)</h3>
+        <p class="card-sub">استرجاع نسخة محفوظة مسبقًا من ملف JSON صدّرته من هنا.</p>
+        <input type="file" id="importJsonInput" accept=".json">
+      </div>
+
+      <div class="card">
+        <h3><i class="fa-solid fa-key"></i> تغيير كلمة مرور لوحة التحكم</h3>
+        <div class="field-row">
+          <div class="field"><label>كلمة المرور الجديدة</label><input type="password" id="newPasswordInput" placeholder="••••••••"></div>
+          <div class="field"><label>تأكيد كلمة المرور</label><input type="password" id="confirmPasswordInput" placeholder="••••••••"></div>
+        </div>
+        <button class="btn btn-outline" id="changePasswordBtn"><i class="fa-solid fa-check"></i> تحديث كلمة المرور</button>
+      </div>
+
+      <div class="card">
+        <h3 style="color:var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> إعادة التعيين</h3>
+        <p class="card-sub">حذف كل التعديلات المحفوظة في هذا المتصفح والرجوع للمحتوى الافتراضي.</p>
+        <button class="btn btn-danger" id="resetDataBtn"><i class="fa-solid fa-rotate-left"></i> إعادة تعيين كل البيانات</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast"><i class="fa-solid fa-circle-check"></i><span id="toastMsg"></span></div>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  const PASS_KEY = 'portfolio-admin-pass';
+  const DEFAULT_PASS = 'admin123';
+  const SESSION_KEY = 'portfolio-admin-session';
+
+  /* ===================== LOGIN ===================== */
+  const loginGate = document.getElementById('loginGate');
+  const adminApp = document.getElementById('adminApp');
+  const loginForm = document.getElementById('loginForm');
+  const loginError = document.getElementById('loginError');
+
+  function getStoredPassword() {
+    return localStorage.getItem(PASS_KEY) || DEFAULT_PASS;
+  }
+
+  function showApp() {
+    loginGate.style.display = 'none';
+    adminApp.classList.add('show');
+    initAdminApp();
+  }
+
+  if (sessionStorage.getItem(SESSION_KEY) === '1') {
+    showApp();
+  }
+
+  loginForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const entered = document.getElementById('adminPassword').value;
+    if (entered === getStoredPassword()) {
+      sessionStorage.setItem(SESSION_KEY, '1');
+      showApp();
+    } else {
+      loginError.textContent = 'كلمة المرور غير صحيحة. حاول مرة أخرى.';
+      document.getElementById('adminPassword').value = '';
+      document.getElementById('adminPassword').focus();
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', function () {
+    sessionStorage.removeItem(SESSION_KEY);
+    location.reload();
+  });
+
+  /* ===================== ADMIN APP (runs only after login) ===================== */
+  let appInitialized = false;
+
+  function initAdminApp() {
+    if (appInitialized) return;
+    appInitialized = true;
+
+    const store = window.PortfolioStore;
+    if (!store) {
+      alert('خطأ: لم يتم تحميل ملف data.js بشكل صحيح.');
+      return;
+    }
+
+    let data = store.load();
+
+    /* ---------- THEME ---------- */
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('adminThemeToggle');
+    const savedTheme = localStorage.getItem('portfolio-theme') || 'light';
+    if (savedTheme === 'dark') { root.setAttribute('data-theme', 'dark'); themeToggle.checked = true; }
+    themeToggle.addEventListener('change', function () {
+      const theme = this.checked ? 'dark' : 'light';
+      if (theme === 'dark') root.setAttribute('data-theme', 'dark');
+      else root.removeAttribute('data-theme');
+      localStorage.setItem('portfolio-theme', theme);
+    });
+
+    /* ---------- NAVIGATION ---------- */
+    const navBtns = document.querySelectorAll('.admin-nav-btn');
+    const panels = document.querySelectorAll('.admin-panel');
+    const sidebar = document.getElementById('adminSidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    navBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        navBtns.forEach(function (b) { b.classList.remove('active'); });
+        panels.forEach(function (p) { p.classList.remove('active'); });
+        btn.classList.add('active');
+        document.querySelector('.admin-panel[data-panel="' + btn.dataset.panel + '"]').classList.add('active');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+        window.scrollTo(0, 0);
+      });
+    });
+
+    document.getElementById('mobileSidebarToggle').addEventListener('click', function () {
+      sidebar.classList.add('open');
+      overlay.classList.add('show');
+    });
+    overlay.addEventListener('click', function () {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('show');
+    });
+
+    /* ---------- TOAST ---------- */
+    function showToast(msg, isError) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      toastMsg.textContent = msg;
+      toast.classList.toggle('toast-error', !!isError);
+      toast.querySelector('i').className = isError ? 'fa-solid fa-circle-exclamation' : 'fa-solid fa-circle-check';
+      toast.classList.add('show');
+      clearTimeout(window._toastTimeout);
+      window._toastTimeout = setTimeout(function () { toast.classList.remove('show'); }, 2800);
+    }
+
+    /* ---------- OVERVIEW COUNTS ---------- */
+    function refreshOverviewCounts() {
+      document.getElementById('overviewProjectsCount').textContent = (data.projects || []).length;
+      document.getElementById('overviewServicesCount').textContent = (data.services || []).length;
+    }
+    refreshOverviewCounts();
+
+    /* ====================================================
+       PROFILE PANEL
+       ==================================================== */
+    function fillProfileForm() {
+      const p = data.profile || {};
+      document.getElementById('p_name_en').value = (p.name && p.name.en) || '';
+      document.getElementById('p_name_ar').value = (p.name && p.name.ar) || '';
+      document.getElementById('p_role_en').value = (p.role && p.role.en) || '';
+      document.getElementById('p_role_ar').value = (p.role && p.role.ar) || '';
+      document.getElementById('p_heroDesc_en').value = (p.heroDesc && p.heroDesc.en) || '';
+      document.getElementById('p_heroDesc_ar').value = (p.heroDesc && p.heroDesc.ar) || '';
+      document.getElementById('p_aboutP1_en').value = (p.aboutP1 && p.aboutP1.en) || '';
+      document.getElementById('p_aboutP1_ar').value = (p.aboutP1 && p.aboutP1.ar) || '';
+      document.getElementById('p_aboutP2_en').value = (p.aboutP2 && p.aboutP2.en) || '';
+      document.getElementById('p_aboutP2_ar').value = (p.aboutP2 && p.aboutP2.ar) || '';
+      document.getElementById('p_statProjects').value = p.statProjects != null ? p.statProjects : 0;
+      document.getElementById('p_statYears').value = p.statYears != null ? p.statYears : 0;
+      document.getElementById('p_statSatisfaction').value = p.statSatisfaction != null ? p.statSatisfaction : 0;
+      document.getElementById('p_cvUrl').value = p.cvUrl || '';
+    }
+    fillProfileForm();
+
+    function val(id) { return document.getElementById(id).value; }
+    function numVal(id) {
+      const n = parseInt(document.getElementById(id).value, 10);
+      return isNaN(n) ? 0 : n;
+    }
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str == null ? '' : String(str);
+      return div.innerHTML;
+    }
+    function escapeAttr(str) {
+      return escapeHtml(str).replace(/"/g, '&quot;');
+    }
+
+    document.getElementById('saveProfileBtn').addEventListener('click', function () {
+      data.profile = {
+        name: { en: val('p_name_en'), ar: val('p_name_ar') },
+        role: { en: val('p_role_en'), ar: val('p_role_ar') },
+        heroDesc: { en: val('p_heroDesc_en'), ar: val('p_heroDesc_ar') },
+        aboutP1: { en: val('p_aboutP1_en'), ar: val('p_aboutP1_ar') },
+        aboutP2: { en: val('p_aboutP2_en'), ar: val('p_aboutP2_ar') },
+        statProjects: numVal('p_statProjects'),
+        statYears: numVal('p_statYears'),
+        statSatisfaction: numVal('p_statSatisfaction'),
+        cvUrl: val('p_cvUrl').trim()
+      };
+      persist();
+    });
+
+    /* ====================================================
+       APPEARANCE PANEL (logo, brand, navbar text)
+       ==================================================== */
+    function refreshLogoPreview() {
+      const img = document.getElementById('brand_logoPreviewImg');
+      const url = data.siteBrand && data.siteBrand.logoImageUrl;
+      const size = (data.siteBrand && data.siteBrand.logoSize) || 32;
+      if (url) {
+        img.src = url;
+        img.style.display = 'block';
+        img.style.height = size + 'px';
+        img.style.width = 'auto';
+      } else {
+        img.style.display = 'none';
+        img.removeAttribute('src');
+      }
+    }
+
+    function fillAppearanceForm() {
+      const brand = data.siteBrand || {};
+      const nav = (data.siteUI && data.siteUI.nav) || {};
+      document.getElementById('brand_logoImageUrl').value = brand.logoImageUrl || '';
+      document.getElementById('brand_logoText').value = brand.logoText || '';
+      document.getElementById('brand_siteTitle_en').value = (brand.siteTitle && brand.siteTitle.en) || '';
+      document.getElementById('brand_siteTitle_ar').value = (brand.siteTitle && brand.siteTitle.ar) || '';
+      const logoSize = brand.logoSize != null ? brand.logoSize : 32;
+      document.getElementById('brand_logoSize').value = logoSize;
+      document.getElementById('brand_logoSizeValue').textContent = logoSize + 'px';
+      refreshLogoPreview();
+
+      ['home', 'about', 'skills', 'services', 'projects', 'experience', 'contact'].forEach(function (key) {
+        document.getElementById('nav_' + key + '_en').value = (nav[key] && nav[key].en) || '';
+        document.getElementById('nav_' + key + '_ar').value = (nav[key] && nav[key].ar) || '';
+      });
+    }
+    fillAppearanceForm();
+
+    document.getElementById('brand_logoSize').addEventListener('input', function () {
+      document.getElementById('brand_logoSizeValue').textContent = this.value + 'px';
+      document.getElementById('brand_logoPreviewImg').style.height = this.value + 'px';
+      document.getElementById('brand_logoPreviewImg').style.width = 'auto';
+    });
+
+    // File upload -> Base64 (stored directly in logoImageUrl, same field as the URL option)
+    document.getElementById('brand_logoImageFile').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 1.5 * 1024 * 1024) {
+        showToast('الصورة كبيرة جدًا (الحد الأقصى تقريبًا 1.5 ميجا) — جرّب صورة أصغر أو استخدم رابط مباشر', true);
+        e.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function () {
+        document.getElementById('brand_logoImageUrl').value = reader.result;
+        document.getElementById('brand_logoPreviewImg').src = reader.result;
+        document.getElementById('brand_logoPreviewImg').style.display = 'block';
+        showToast('تم تحميل الصورة — لا تنسَ الضغط على "حفظ التغييرات"');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Manual URL typed/pasted directly
+    document.getElementById('brand_logoImageUrl').addEventListener('input', function () {
+      const img = document.getElementById('brand_logoPreviewImg');
+      if (this.value) {
+        img.src = this.value;
+        img.style.display = 'block';
+      } else {
+        img.style.display = 'none';
+      }
+    });
+
+    document.getElementById('brand_clearLogoBtn').addEventListener('click', function () {
+      document.getElementById('brand_logoImageUrl').value = '';
+      document.getElementById('brand_logoImageFile').value = '';
+      document.getElementById('brand_logoPreviewImg').style.display = 'none';
+    });
+
+    function saveAppearance() {
+      data.siteBrand = {
+        logoText: val('brand_logoText').trim() || 'Codavo Solutions',
+        logoImageUrl: val('brand_logoImageUrl').trim(),
+        logoSize: parseInt(document.getElementById('brand_logoSize').value, 10) || 32,
+        siteTitle: { en: val('brand_siteTitle_en'), ar: val('brand_siteTitle_ar') }
+      };
+      data.siteUI = data.siteUI || {};
+      data.siteUI.nav = {};
+      ['home', 'about', 'skills', 'services', 'projects', 'experience', 'contact'].forEach(function (key) {
+        data.siteUI.nav[key] = { en: val('nav_' + key + '_en'), ar: val('nav_' + key + '_ar') };
+      });
+      persist();
+    }
+    document.getElementById('saveAppearanceBtn').addEventListener('click', saveAppearance);
+
+    /* ====================================================
+       CONTACT PANEL
+       ==================================================== */
+    function fillContactForm() {
+      const c = data.contact || {};
+      document.getElementById('c_email').value = c.email || '';
+      document.getElementById('c_phone').value = c.phone || '';
+      document.getElementById('c_whatsapp').value = c.whatsapp || '';
+      document.getElementById('c_github').value = c.github || '';
+      document.getElementById('c_linkedin').value = c.linkedin || '';
+      document.getElementById('c_facebook').value = c.facebook || '';
+      document.getElementById('c_behance').value = c.behance || '';
+      document.getElementById('c_web3formsKey').value = c.web3formsAccessKey || '';
+    }
+    fillContactForm();
+
+    document.getElementById('saveContactBtn').addEventListener('click', function () {
+      data.contact = {
+        email: val('c_email').trim(),
+        phone: val('c_phone').trim(),
+        whatsapp: val('c_whatsapp').replace(/\D/g, ''),
+        github: val('c_github').trim(),
+        linkedin: val('c_linkedin').trim(),
+        facebook: val('c_facebook').trim(),
+        behance: val('c_behance').trim(),
+        web3formsAccessKey: val('c_web3formsKey').trim()
+      };
+      persist();
+    });
+
+    /* ====================================================
+       SERVICES PANEL (repeatable)
+       ==================================================== */
+    const FA_ICON_SUGGESTIONS = [
+      'fa-solid fa-globe','fa-solid fa-bolt','fa-solid fa-graduation-cap','fa-solid fa-chart-line',
+      'fa-solid fa-desktop','fa-solid fa-database','fa-solid fa-screwdriver-wrench','fa-solid fa-code',
+      'fa-solid fa-mobile-screen-button','fa-solid fa-paintbrush','fa-solid fa-server','fa-solid fa-shield-halved'
+    ];
+
+    function renderServicesList() {
+      const container = document.getElementById('servicesList');
+      const services = data.services || [];
+      if (!services.length) {
+        container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox" style="font-size:1.6rem;display:block;margin-bottom:8px;"></i>لا توجد خدمات بعد. أضف أول خدمة بالأسفل.</div>';
+        return;
+      }
+      container.innerHTML = services.map(function (svc, i) {
+        return (
+          '<div class="repeatable-item" data-index="' + i + '">' +
+            '<div class="repeatable-item-head">' +
+              '<span class="drag-num">#' + (i + 1) + '</span>' +
+              '<div class="repeatable-item-actions">' +
+                (i > 0 ? '<button class="icon-action-btn" data-action="up" title="نقل للأعلى"><i class="fa-solid fa-arrow-up"></i></button>' : '') +
+                (i < services.length - 1 ? '<button class="icon-action-btn" data-action="down" title="نقل للأسفل"><i class="fa-solid fa-arrow-down"></i></button>' : '') +
+                '<button class="icon-action-btn danger" data-action="delete" title="حذف"><i class="fa-solid fa-trash"></i></button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="icon-field-row">' +
+              '<span class="icon-picker-preview"><i class="' + escapeAttr(svc.icon) + '"></i></span>' +
+              '<div class="field">' +
+                '<label>كلاس أيقونة Font Awesome</label>' +
+                '<input type="text" data-field="icon" value="' + escapeAttr(svc.icon) + '" list="iconSuggestions">' +
+              '</div>' +
+            '</div>' +
+            '<div class="field-row">' +
+              '<div class="field"><label>العنوان <span class="lang-tag">EN</span></label><input type="text" data-field="title_en" value="' + escapeAttr(svc.title.en) + '"></div>' +
+              '<div class="field"><label>العنوان <span class="lang-tag">AR</span></label><input type="text" data-field="title_ar" value="' + escapeAttr(svc.title.ar) + '"></div>' +
+            '</div>' +
+            '<div class="field-row">' +
+              '<div class="field"><label>الوصف <span class="lang-tag">EN</span></label><textarea data-field="desc_en">' + escapeHtml(svc.desc.en) + '</textarea></div>' +
+              '<div class="field"><label>الوصف <span class="lang-tag">AR</span></label><textarea data-field="desc_ar">' + escapeHtml(svc.desc.ar) + '</textarea></div>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join('') + '<datalist id="iconSuggestions">' + FA_ICON_SUGGESTIONS.map(function (i) { return '<option value="' + i + '">'; }).join('') + '</datalist>';
+    }
+    renderServicesList();
+
+    document.getElementById('addServiceBtn').addEventListener('click', function () {
+      data.services = data.services || [];
+      data.services.push({
+        icon: 'fa-solid fa-star',
+        title: { en: 'New Service', ar: 'خدمة جديدة' },
+        desc: { en: 'Describe this service.', ar: 'وصف هذه الخدمة.' }
+      });
+      renderServicesList();
+    });
+
+    document.getElementById('servicesList').addEventListener('click', function (e) {
+      handleRepeatableActions('services', renderServicesList, e);
+    });
+    document.getElementById('servicesList').addEventListener('input', function (e) {
+      const item = e.target.closest('.repeatable-item');
+      if (!item) return;
+      const idx = parseInt(item.dataset.index, 10);
+      const field = e.target.dataset.field;
+      if (!field) return;
+      const svc = data.services[idx];
+      if (field === 'icon') {
+        svc.icon = e.target.value;
+        item.querySelector('.icon-picker-preview i').className = e.target.value || 'fa-solid fa-star';
+      } else if (field === 'title_en') svc.title.en = e.target.value;
+      else if (field === 'title_ar') svc.title.ar = e.target.value;
+      else if (field === 'desc_en') svc.desc.en = e.target.value;
+      else if (field === 'desc_ar') svc.desc.ar = e.target.value;
+    });
+
+    document.getElementById('saveServicesBtn').addEventListener('click', persist);
+
+    /* ====================================================
+       SKILLS PANEL
+       ==================================================== */
+    const skillGroups = ['frontend', 'backend', 'desktop'];
+
+    function renderSkillGroup(group) {
+      const container = document.getElementById('skillsList_' + group);
+      const items = (data.skills && data.skills[group]) || [];
+      if (!items.length) {
+        container.innerHTML = '<div class="empty-state">لا توجد مهارات في هذه الفئة بعد.</div>';
+        return;
+      }
+      container.innerHTML = items.map(function (item, i) {
+        const nameVal = typeof item.name === 'string' ? item.name : (item.name.en || '');
+        const nameArVal = typeof item.name === 'string' ? '' : (item.name.ar || '');
+        return (
+          '<div class="repeatable-item" data-index="' + i + '" data-group="' + group + '">' +
+            '<div class="repeatable-item-head">' +
+              '<span class="drag-num">#' + (i + 1) + '</span>' +
+              '<button class="icon-action-btn danger" data-action="delete" title="حذف"><i class="fa-solid fa-trash"></i></button>' +
+            '</div>' +
+            '<div class="field-row">' +
+              '<div class="field"><label>الاسم <span class="lang-tag">EN</span></label><input type="text" data-field="name_en" value="' + escapeAttr(nameVal) + '"></div>' +
+              '<div class="field"><label>الاسم <span class="lang-tag">AR</span> (اختياري)</label><input type="text" data-field="name_ar" value="' + escapeAttr(nameArVal) + '" placeholder="يتساوى مع EN لو فاضي"></div>' +
+            '</div>' +
+            '<div class="field">' +
+              '<label>النسبة</label>' +
+              '<div class="range-row">' +
+                '<input type="range" min="0" max="100" data-field="percent" value="' + item.percent + '">' +
+                '<span class="range-value">' + item.percent + '%</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+    }
+
+    function renderAllSkillGroups() {
+      skillGroups.forEach(renderSkillGroup);
+      renderToolsTags();
+    }
+    renderAllSkillGroups();
+
+    function attachSkillGroupEvents(group) {
+      const container = document.getElementById('skillsList_' + group);
+      container.addEventListener('click', function (e) {
+        const btn = e.target.closest('[data-action="delete"]');
+        if (!btn) return;
+        const item = btn.closest('.repeatable-item');
+        const idx = parseInt(item.dataset.index, 10);
+        data.skills[group].splice(idx, 1);
+        renderSkillGroup(group);
+      });
+      container.addEventListener('input', function (e) {
+        const item = e.target.closest('.repeatable-item');
+        if (!item) return;
+        const idx = parseInt(item.dataset.index, 10);
+        const field = e.target.dataset.field;
+        const skillItem = data.skills[group][idx];
+        if (field === 'name_en') {
+          if (typeof skillItem.name === 'string') skillItem.name = { en: e.target.value, ar: skillItem.name };
+          else skillItem.name.en = e.target.value;
+        } else if (field === 'name_ar') {
+          if (typeof skillItem.name === 'string') skillItem.name = { en: skillItem.name, ar: e.target.value };
+          else skillItem.name.ar = e.target.value;
+        } else if (field === 'percent') {
+          skillItem.percent = parseInt(e.target.value, 10);
+          item.querySelector('.range-value').textContent = skillItem.percent + '%';
+        }
+      });
+    }
+    skillGroups.forEach(attachSkillGroupEvents);
+
+    document.querySelectorAll('.add-item-btn[data-group]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const group = btn.dataset.group;
+        data.skills[group] = data.skills[group] || [];
+        data.skills[group].push({ name: { en: 'New Skill', ar: 'مهارة جديدة' }, percent: 50 });
+        renderSkillGroup(group);
+      });
+    });
+
+    function renderToolsTags() {
+      const list = document.getElementById('toolsTagsList');
+      const tools = (data.skills && data.skills.tools) || [];
+      if (!tools.length) {
+        list.innerHTML = '<span class="card-sub" style="margin:0;">لا توجد أدوات مضافة بعد.</span>';
+        return;
+      }
+      list.innerHTML = tools.map(function (tool, i) {
+        return '<span class="tag-chip">' + escapeHtml(tool) + '<button data-remove-tool="' + i + '"><i class="fa-solid fa-xmark"></i></button></span>';
+      }).join('');
+    }
+    document.getElementById('toolsTagsList').addEventListener('click', function (e) {
+      const btn = e.target.closest('[data-remove-tool]');
+      if (!btn) return;
+      const idx = parseInt(btn.dataset.removeTool, 10);
+      data.skills.tools.splice(idx, 1);
+      renderToolsTags();
+    });
+    document.getElementById('toolsInput').addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const value = this.value.trim();
+      if (!value) return;
+      data.skills.tools = data.skills.tools || [];
+      data.skills.tools.push(value);
+      this.value = '';
+      renderToolsTags();
+    });
+
+    document.getElementById('saveSkillsBtn').addEventListener('click', persist);
+
+    /* ====================================================
+       PROJECTS PANEL
+       ==================================================== */
+    const PROJECT_THUMB_CLASSES = ['project-thumb--1', 'project-thumb--2', 'project-thumb--3', 'project-thumb--4'];
+
+    function renderProjectsList() {
+      const container = document.getElementById('projectsList');
+      const projects = data.projects || [];
+      if (!projects.length) {
+        container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox" style="font-size:1.6rem;display:block;margin-bottom:8px;"></i>لا توجد مشاريع بعد. أضف أول مشروع بالأسفل.</div>';
+        return;
+      }
+      container.innerHTML = projects.map(function (proj, i) {
+        const tagsHtml = (proj.tags || []).map(function (tag, ti) {
+          return '<span class="tag-chip">' + escapeHtml(tag) + '<button data-remove-projtag="' + ti + '"><i class="fa-solid fa-xmark"></i></button></span>';
+        }).join('');
+        const hasImage = !!proj.image;
+        return (
+          '<div class="repeatable-item" data-index="' + i + '">' +
+            '<div class="repeatable-item-head">' +
+              '<span class="drag-num">#' + (i + 1) + '</span>' +
+              '<div class="repeatable-item-actions">' +
+                (i > 0 ? '<button class="icon-action-btn" data-action="up" title="نقل للأعلى"><i class="fa-solid fa-arrow-up"></i></button>' : '') +
+                (i < projects.length - 1 ? '<button class="icon-action-btn" data-action="down" title="نقل للأسفل"><i class="fa-solid fa-arrow-down"></i></button>' : '') +
+                '<button class="icon-action-btn danger" data-action="delete" title="حذف"><i class="fa-solid fa-trash"></i></button>' +
+              '</div>' +
+            '</div>' +
+
+            '<div class="field" style="margin-bottom:16px;">' +
+              '<label><i class="fa-solid fa-image"></i> صورة مصغّرة للمشروع (اختياري — لو فاضية تظهر الأيقونة الملوّنة بدلها)</label>' +
+              '<div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">' +
+                '<div data-role="img-preview-wrap" style="width:64px; height:64px; border-radius:10px; overflow:hidden; background:var(--bg-elevated); border:1px solid var(--border); flex-shrink:0; display:flex; align-items:center; justify-content:center;">' +
+                  (hasImage
+                    ? '<img data-role="img-preview" src="' + escapeAttr(proj.image) + '" style="width:100%;height:100%;object-fit:cover;">'
+                    : '<i class="fa-solid fa-image" style="color:var(--text-tertiary);" data-role="img-preview-placeholder"></i>') +
+                '</div>' +
+                '<div style="flex:1;">' +
+                  '<input type="file" data-field="imageFile" accept="image/*" style="margin-bottom:8px;">' +
+                  '<input type="url" data-field="imageUrl" value="' + escapeAttr(hasImage && proj.image.indexOf('data:') !== 0 ? proj.image : '') + '" placeholder="أو رابط صورة مباشر https://...">' +
+                '</div>' +
+                '<button class="icon-action-btn danger" data-action="clearImage" title="إزالة الصورة" type="button"><i class="fa-solid fa-trash"></i></button>' +
+              '</div>' +
+              '<span class="field-hint">يُفضّل صورة بحجم أقل من 1.5 ميجا. الصور المرفوعة تُخزَّن مباشرة داخل بيانات الموقع.</span>' +
+            '</div>' +
+
+            '<div class="icon-field-row">' +
+              '<span class="icon-picker-preview"><i class="' + escapeAttr(proj.icon) + '"></i></span>' +
+              '<div class="field"><label>أيقونة Font Awesome (تظهر لو مفيش صورة)</label><input type="text" data-field="icon" value="' + escapeAttr(proj.icon) + '"></div>' +
+              '<div class="field"><label>لون البطاقة (لو مفيش صورة)</label>' +
+                '<select data-field="thumbClass">' +
+                  PROJECT_THUMB_CLASSES.map(function (cls) {
+                    return '<option value="' + cls + '"' + (proj.thumbClass === cls ? ' selected' : '') + '>' + cls.replace('project-thumb--', 'لون ') + '</option>';
+                  }).join('') +
+                '</select>' +
+              '</div>' +
+            '</div>' +
+            '<div class="field-row">' +
+              '<div class="field"><label>اسم المشروع <span class="lang-tag">EN</span></label><input type="text" data-field="title_en" value="' + escapeAttr(proj.title.en) + '"></div>' +
+              '<div class="field"><label>اسم المشروع <span class="lang-tag">AR</span></label><input type="text" data-field="title_ar" value="' + escapeAttr(proj.title.ar) + '"></div>' +
+            '</div>' +
+            '<div class="field-row">' +
+              '<div class="field"><label>الوصف <span class="lang-tag">EN</span></label><textarea data-field="desc_en">' + escapeHtml(proj.desc.en) + '</textarea></div>' +
+              '<div class="field"><label>الوصف <span class="lang-tag">AR</span></label><textarea data-field="desc_ar">' + escapeHtml(proj.desc.ar) + '</textarea></div>' +
+            '</div>' +
+            '<div class="field">' +
+              '<label>التقنيات المستخدمة (اكتب واضغط Enter)</label>' +
+              '<div class="tags-input-list">' + tagsHtml + '</div>' +
+              '<input type="text" data-field="tagInput" placeholder="مثال: Laravel">' +
+            '</div>' +
+            '<div class="field">' +
+              '<label>رابط Live Demo</label><input type="url" data-field="liveUrl" value="' + escapeAttr(proj.liveUrl === '#' ? '' : proj.liveUrl) + '" placeholder="https://...">' +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+    }
+    renderProjectsList();
+
+    document.getElementById('addProjectBtn').addEventListener('click', function () {
+      data.projects = data.projects || [];
+      data.projects.push({
+        icon: 'fa-solid fa-folder',
+        thumbClass: PROJECT_THUMB_CLASSES[data.projects.length % 4],
+        image: '',
+        title: { en: 'New Project', ar: 'مشروع جديد' },
+        desc: { en: 'Project description.', ar: 'وصف المشروع.' },
+        tags: [],
+        liveUrl: '#',
+        codeUrl: '#'
+      });
+      renderProjectsList();
+    });
+
+    document.getElementById('projectsList').addEventListener('click', function (e) {
+      handleRepeatableActions('projects', renderProjectsList, e);
+      const removeTagBtn = e.target.closest('[data-remove-projtag]');
+      if (removeTagBtn) {
+        const item = removeTagBtn.closest('.repeatable-item');
+        const idx = parseInt(item.dataset.index, 10);
+        const tagIdx = parseInt(removeTagBtn.dataset.removeProjtag, 10);
+        data.projects[idx].tags.splice(tagIdx, 1);
+        renderProjectsList();
+      }
+      const clearImageBtn = e.target.closest('[data-action="clearImage"]');
+      if (clearImageBtn) {
+        const item = clearImageBtn.closest('.repeatable-item');
+        const idx = parseInt(item.dataset.index, 10);
+        data.projects[idx].image = '';
+        renderProjectsList();
+      }
+    });
+
+    document.getElementById('projectsList').addEventListener('change', function (e) {
+      const fileInput = e.target.closest('[data-field="imageFile"]');
+      if (!fileInput) return;
+      const file = fileInput.files[0];
+      if (!file) return;
+      if (file.size > 1.5 * 1024 * 1024) {
+        showToast('الصورة كبيرة جدًا (الحد الأقصى تقريبًا 1.5 ميجا) — جرّب صورة أصغر أو استخدم رابط مباشر', true);
+        fileInput.value = '';
+        return;
+      }
+      const item = fileInput.closest('.repeatable-item');
+      const idx = parseInt(item.dataset.index, 10);
+      const reader = new FileReader();
+      reader.onload = function () {
+        data.projects[idx].image = reader.result;
+        renderProjectsList();
+        showToast('تم تحميل الصورة — لا تنسَ الضغط على "حفظ"');
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('projectsList').addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      const input = e.target.closest('[data-field="tagInput"]');
+      if (!input) return;
+      e.preventDefault();
+      const value = input.value.trim();
+      if (!value) return;
+      const item = input.closest('.repeatable-item');
+      const idx = parseInt(item.dataset.index, 10);
+      data.projects[idx].tags = data.projects[idx].tags || [];
+      data.projects[idx].tags.push(value);
+      renderProjectsList();
+    });
+
+    document.getElementById('projectsList').addEventListener('input', function (e) {
+      const item = e.target.closest('.repeatable-item');
+      if (!item) return;
+      const idx = parseInt(item.dataset.index, 10);
+      const field = e.target.dataset.field;
+      if (!field || field === 'tagInput') return;
+      const proj = data.projects[idx];
+      if (field === 'icon') {
+        proj.icon = e.target.value;
+        item.querySelector('.icon-picker-preview i').className = e.target.value || 'fa-solid fa-folder';
+      } else if (field === 'thumbClass') proj.thumbClass = e.target.value;
+      else if (field === 'title_en') proj.title.en = e.target.value;
+      else if (field === 'title_ar') proj.title.ar = e.target.value;
+      else if (field === 'desc_en') proj.desc.en = e.target.value;
+      else if (field === 'desc_ar') proj.desc.ar = e.target.value;
+      else if (field === 'liveUrl') proj.liveUrl = e.target.value.trim() || '#';
+      else if (field === 'codeUrl') proj.codeUrl = e.target.value.trim() || '#';
+      else if (field === 'imageUrl') {
+        proj.image = e.target.value.trim();
+        const wrap = item.querySelector('[data-role="img-preview-wrap"]');
+        if (wrap) {
+          if (proj.image) {
+            wrap.innerHTML = '<img data-role="img-preview" src="' + escapeAttr(proj.image) + '" style="width:100%;height:100%;object-fit:cover;">';
+          } else {
+            wrap.innerHTML = '<i class="fa-solid fa-image" style="color:var(--text-tertiary);" data-role="img-preview-placeholder"></i>';
+          }
+        }
+      }
+    });
+
+    document.getElementById('saveProjectsBtn').addEventListener('click', persist);
+
+    /* ====================================================
+       EXPERIENCE PANEL
+       ==================================================== */
+    function renderExperienceList() {
+      const container = document.getElementById('experienceList');
+      const items = data.experience || [];
+      if (!items.length) {
+        container.innerHTML = '<div class="empty-state"><i class="fa-solid fa-inbox" style="font-size:1.6rem;display:block;margin-bottom:8px;"></i>لا توجد محطات بعد. أضف أول محطة بالأسفل.</div>';
+        return;
+      }
+      container.innerHTML = items.map(function (exp, i) {
+        return (
+          '<div class="repeatable-item" data-index="' + i + '">' +
+            '<div class="repeatable-item-head">' +
+              '<span class="drag-num">#' + (i + 1) + '</span>' +
+              '<div class="repeatable-item-actions">' +
+                (i > 0 ? '<button class="icon-action-btn" data-action="up" title="نقل للأعلى"><i class="fa-solid fa-arrow-up"></i></button>' : '') +
+                (i < items.length - 1 ? '<button class="icon-action-btn" data-action="down" title="نقل للأسفل"><i class="fa-solid fa-arrow-down"></i></button>' : '') +
+                '<button class="icon-action-btn danger" data-action="delete" title="حذف"><i class="fa-solid fa-trash"></i></button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="icon-field-row">' +
+              '<span class="icon-picker-preview"><i class="' + escapeAttr(exp.icon) + '"></i></span>' +
+              '<div class="field"><label>أيقونة Font Awesome</label><input type="text" data-field="icon" value="' + escapeAttr(exp.icon) + '"></div>' +
+            '</div>' +
+            '<div class="field-row">' +
+              '<div class="field"><label>العنوان <span class="lang-tag">EN</span></label><input type="text" data-field="title_en" value="' + escapeAttr(exp.title.en) + '"></div>' +
+              '<div class="field"><label>العنوان <span class="lang-tag">AR</span></label><input type="text" data-field="title_ar" value="' + escapeAttr(exp.title.ar) + '"></div>' +
+            '</div>' +
+            '<div class="field-row">' +
+              '<div class="field"><label>الوصف <span class="lang-tag">EN</span></label><textarea data-field="desc_en">' + escapeHtml(exp.desc.en) + '</textarea></div>' +
+              '<div class="field"><label>الوصف <span class="lang-tag">AR</span></label><textarea data-field="desc_ar">' + escapeHtml(exp.desc.ar) + '</textarea></div>' +
+            '</div>' +
+          '</div>'
+        );
+      }).join('');
+    }
+    renderExperienceList();
+
+    document.getElementById('addExperienceBtn').addEventListener('click', function () {
+      data.experience = data.experience || [];
+      data.experience.push({
+        icon: 'fa-solid fa-flag',
+        title: { en: 'New Milestone', ar: 'محطة جديدة' },
+        desc: { en: 'Describe this milestone.', ar: 'صف هذه المحطة.' }
+      });
+      renderExperienceList();
+    });
+
+    document.getElementById('experienceList').addEventListener('click', function (e) {
+      handleRepeatableActions('experience', renderExperienceList, e);
+    });
+    document.getElementById('experienceList').addEventListener('input', function (e) {
+      const item = e.target.closest('.repeatable-item');
+      if (!item) return;
+      const idx = parseInt(item.dataset.index, 10);
+      const field = e.target.dataset.field;
+      if (!field) return;
+      const exp = data.experience[idx];
+      if (field === 'icon') {
+        exp.icon = e.target.value;
+        item.querySelector('.icon-picker-preview i').className = e.target.value || 'fa-solid fa-flag';
+      } else if (field === 'title_en') exp.title.en = e.target.value;
+      else if (field === 'title_ar') exp.title.ar = e.target.value;
+      else if (field === 'desc_en') exp.desc.en = e.target.value;
+      else if (field === 'desc_ar') exp.desc.ar = e.target.value;
+    });
+
+    document.getElementById('saveExperienceBtn').addEventListener('click', persist);
+
+    /* ====================================================
+       ALL OTHER TEXTS PANEL (siteUI: hero buttons, section
+       titles, about cards, skills labels, project buttons,
+       contact form, footer)
+       ==================================================== */
+    const TEXT_FIELD_MAP = [
+      // [input id suffix, path inside data.siteUI]
+      ['ui_hero_eyebrow', ['hero', 'eyebrow']],
+      ['ui_hero_greeting', ['hero', 'greeting']],
+      ['ui_hero_btnWork', ['hero', 'btnWork']],
+      ['ui_hero_btnContact', ['hero', 'btnContact']],
+      ['ui_hero_btnCv', ['hero', 'btnCv']],
+      ['ui_hero_statProjectsLabel', ['hero', 'statProjectsLabel']],
+      ['ui_hero_statYearsLabel', ['hero', 'statYearsLabel']],
+      ['ui_hero_statSatisfactionLabel', ['hero', 'statSatisfactionLabel']],
+
+      ['ui_st_aboutEyebrow', ['sectionTitles', 'aboutEyebrow']],
+      ['ui_st_aboutTitle', ['sectionTitles', 'aboutTitle']],
+      ['ui_st_skillsEyebrow', ['sectionTitles', 'skillsEyebrow']],
+      ['ui_st_skillsTitle', ['sectionTitles', 'skillsTitle']],
+      ['ui_st_servicesEyebrow', ['sectionTitles', 'servicesEyebrow']],
+      ['ui_st_servicesTitle', ['sectionTitles', 'servicesTitle']],
+      ['ui_st_projectsEyebrow', ['sectionTitles', 'projectsEyebrow']],
+      ['ui_st_projectsTitle', ['sectionTitles', 'projectsTitle']],
+      ['ui_st_experienceEyebrow', ['sectionTitles', 'experienceEyebrow']],
+      ['ui_st_experienceTitle', ['sectionTitles', 'experienceTitle']],
+      ['ui_st_contactEyebrow', ['sectionTitles', 'contactEyebrow']],
+      ['ui_st_contactTitle', ['sectionTitles', 'contactTitle']],
+
+      ['ui_ab_card1Title', ['about', 'card1Title']],
+      ['ui_ab_card1Desc', ['about', 'card1Desc']],
+      ['ui_ab_card2Title', ['about', 'card2Title']],
+      ['ui_ab_card2Desc', ['about', 'card2Desc']],
+      ['ui_ab_card3Title', ['about', 'card3Title']],
+      ['ui_ab_card3Desc', ['about', 'card3Desc']],
+      ['ui_ab_card4Title', ['about', 'card4Title']],
+      ['ui_ab_card4Desc', ['about', 'card4Desc']],
+      ['ui_ab_signatureRole', ['about', 'signatureRole']],
+
+      ['ui_sk_frontend', ['skillsLabels', 'frontend']],
+      ['ui_sk_backend', ['skillsLabels', 'backend']],
+      ['ui_sk_desktop', ['skillsLabels', 'desktop']],
+      ['ui_sk_tools', ['skillsLabels', 'tools']],
+
+      ['ui_pr_liveDemo', ['projectsLabels', 'liveDemo']],
+      ['ui_pr_viewMore', ['projectsLabels', 'viewMore']],
+
+      ['ui_cf_lead', ['contactForm', 'lead']],
+      ['ui_cf_nameField', ['contactForm', 'nameField']],
+      ['ui_cf_emailField', ['contactForm', 'emailField']],
+      ['ui_cf_subjectField', ['contactForm', 'subjectField']],
+      ['ui_cf_messageField', ['contactForm', 'messageField']],
+      ['ui_cf_sendBtn', ['contactForm', 'sendBtn']],
+      ['ui_cf_successMsg', ['contactForm', 'successMsg']],
+      ['ui_cf_emailLabel', ['contactForm', 'emailLabel']],
+      ['ui_cf_phoneLabel', ['contactForm', 'phoneLabel']],
+      ['ui_cf_whatsappLabel', ['contactForm', 'whatsappLabel']],
+
+      ['ui_ft_rights', ['footer', 'rights']]
+    ];
+
+    function getPath(obj, pathArr) {
+      let cur = obj;
+      for (let i = 0; i < pathArr.length; i++) {
+        if (cur == null) return undefined;
+        cur = cur[pathArr[i]];
+      }
+      return cur;
+    }
+
+    function setPath(obj, pathArr, value) {
+      let cur = obj;
+      for (let i = 0; i < pathArr.length - 1; i++) {
+        const key = pathArr[i];
+        if (typeof cur[key] !== 'object' || cur[key] === null) cur[key] = {};
+        cur = cur[key];
+      }
+      cur[pathArr[pathArr.length - 1]] = value;
+    }
+
+    function fillTextsForm() {
+      data.siteUI = data.siteUI || {};
+      TEXT_FIELD_MAP.forEach(function (entry) {
+        const idPrefix = entry[0];
+        const path = entry[1];
+        const fieldVal = getPath(data.siteUI, path) || {};
+        const enEl = document.getElementById(idPrefix + '_en');
+        const arEl = document.getElementById(idPrefix + '_ar');
+        if (enEl) enEl.value = fieldVal.en || '';
+        if (arEl) arEl.value = fieldVal.ar || '';
+      });
+    }
+    fillTextsForm();
+
+    function saveTexts() {
+      data.siteUI = data.siteUI || {};
+      TEXT_FIELD_MAP.forEach(function (entry) {
+        const idPrefix = entry[0];
+        const path = entry[1];
+        const enEl = document.getElementById(idPrefix + '_en');
+        const arEl = document.getElementById(idPrefix + '_ar');
+        setPath(data.siteUI, path, {
+          en: enEl ? enEl.value : '',
+          ar: arEl ? arEl.value : ''
+        });
+      });
+      persist();
+    }
+    document.getElementById('saveTextsBtn').addEventListener('click', saveTexts);
+    document.getElementById('saveTextsBtn2').addEventListener('click', saveTexts);
+
+    /* ====================================================
+       SHARED: reorder / delete handler for repeatable lists
+       ==================================================== */
+    function handleRepeatableActions(key, rerenderFn, e) {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      const item = btn.closest('.repeatable-item');
+      const idx = parseInt(item.dataset.index, 10);
+      const action = btn.dataset.action;
+      const arr = data[key];
+      if (action === 'delete') {
+        arr.splice(idx, 1);
+      } else if (action === 'up' && idx > 0) {
+        const tmp = arr[idx - 1];
+        arr[idx - 1] = arr[idx];
+        arr[idx] = tmp;
+      } else if (action === 'down' && idx < arr.length - 1) {
+        const tmp = arr[idx + 1];
+        arr[idx + 1] = arr[idx];
+        arr[idx] = tmp;
+      }
+      rerenderFn();
+    }
+
+    /* ====================================================
+       SETTINGS PANEL — export / import / password / reset
+       ==================================================== */
+    function buildDataJsFileContent(currentData) {
+      const json = JSON.stringify(currentData, null, 2);
+      return (
+        "/* ===========================================================\n" +
+        "   PORTFOLIO — data.js (exported from the Admin Panel)\n" +
+        "   Replace the existing data.js in your GitHub repo with this\n" +
+        "   file, then commit & push, to publish these changes live.\n" +
+        "   =========================================================== */\n\n" +
+        "(function (global) {\n" +
+        "  'use strict';\n\n" +
+        "  var STORAGE_KEY = 'portfolio-site-data';\n" +
+        "  var defaultData = " + json + ";\n\n" +
+        "  function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }\n\n" +
+        "  function deepMerge(base, override) {\n" +
+        "    if (Array.isArray(override)) return override;\n" +
+        "    if (typeof override !== 'object' || override === null) return override;\n" +
+        "    var result = Object.assign({}, base);\n" +
+        "    Object.keys(override).forEach(function (key) {\n" +
+        "      if (\n" +
+        "        typeof override[key] === 'object' && override[key] !== null &&\n" +
+        "        typeof base[key] === 'object' && base[key] !== null &&\n" +
+        "        !Array.isArray(override[key])\n" +
+        "      ) {\n" +
+        "        result[key] = deepMerge(base[key], override[key]);\n" +
+        "      } else {\n" +
+        "        result[key] = override[key];\n" +
+        "      }\n" +
+        "    });\n" +
+        "    return result;\n" +
+        "  }\n\n" +
+        "  function loadData() {\n" +
+        "    try {\n" +
+        "      var raw = localStorage.getItem(STORAGE_KEY);\n" +
+        "      if (!raw) return deepClone(defaultData);\n" +
+        "      var parsed = JSON.parse(raw);\n" +
+        "      return deepMerge(deepClone(defaultData), parsed);\n" +
+        "    } catch (e) {\n" +
+        "      console.warn('Could not load saved site data, using defaults.', e);\n" +
+        "      return deepClone(defaultData);\n" +
+        "    }\n" +
+        "  }\n\n" +
+        "  function saveData(data) {\n" +
+        "    try {\n" +
+        "      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));\n" +
+        "      return true;\n" +
+        "    } catch (e) {\n" +
+        "      console.error('Could not save site data.', e);\n" +
+        "      return false;\n" +
+        "    }\n" +
+        "  }\n\n" +
+        "  function resetData() { localStorage.removeItem(STORAGE_KEY); }\n\n" +
+        "  global.PortfolioStore = {\n" +
+        "    STORAGE_KEY: STORAGE_KEY,\n" +
+        "    defaultData: defaultData,\n" +
+        "    load: loadData,\n" +
+        "    save: saveData,\n" +
+        "    reset: resetData,\n" +
+        "    clone: deepClone\n" +
+        "  };\n\n" +
+        "})(window);\n"
+      );
+    }
+
+    function downloadFile(filename, content, mime) {
+      const blob = new Blob([content], { type: mime || 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportDataJs() {
+      downloadFile('data.js', buildDataJsFileContent(data), 'text/javascript');
+      showToast('تم تصدير data.js — استبدل به الملف في GitHub وارفعه');
+    }
+
+    document.getElementById('exportDataBtn').addEventListener('click', exportDataJs);
+    document.getElementById('quickExportBtn').addEventListener('click', exportDataJs);
+
+    document.getElementById('exportJsonBtn').addEventListener('click', function () {
+      downloadFile('portfolio-backup.json', JSON.stringify(data, null, 2), 'application/json');
+      showToast('تم تصدير نسخة JSON احتياطية');
+    });
+
+    function deepMergeLocal(base, override) {
+      if (Array.isArray(override)) return override;
+      if (typeof override !== 'object' || override === null) return override;
+      const result = Object.assign({}, base);
+      Object.keys(override).forEach(function (key) {
+        if (
+          typeof override[key] === 'object' && override[key] !== null &&
+          typeof base[key] === 'object' && base[key] !== null &&
+          !Array.isArray(override[key])
+        ) {
+          result[key] = deepMergeLocal(base[key], override[key]);
+        } else {
+          result[key] = override[key];
+        }
+      });
+      return result;
+    }
+
+    document.getElementById('importJsonInput').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function () {
+        try {
+          const imported = JSON.parse(reader.result);
+          data = deepMergeLocal(store.clone(store.defaultData), imported);
+          store.save(data);
+          showToast('تم استيراد البيانات بنجاح، جاري إعادة التحميل...');
+          setTimeout(function () { location.reload(); }, 1200);
+        } catch (err) {
+          showToast('فشل الاستيراد: الملف غير صالح', true);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById('changePasswordBtn').addEventListener('click', function () {
+      const pass1 = document.getElementById('newPasswordInput').value;
+      const pass2 = document.getElementById('confirmPasswordInput').value;
+      if (!pass1 || pass1.length < 4) {
+        showToast('كلمة المرور يجب أن تكون 4 أحرف على الأقل', true);
+        return;
+      }
+      if (pass1 !== pass2) {
+        showToast('كلمتا المرور غير متطابقتين', true);
+        return;
+      }
+      localStorage.setItem(PASS_KEY, pass1);
+      document.getElementById('newPasswordInput').value = '';
+      document.getElementById('confirmPasswordInput').value = '';
+      showToast('تم تحديث كلمة المرور بنجاح');
+    });
+
+    document.getElementById('resetDataBtn').addEventListener('click', function () {
+      if (!confirm('هل أنت متأكد؟ سيتم حذف كل التعديلات المحفوظة في هذا المتصفح والرجوع للمحتوى الافتراضي. لا يمكن التراجع عن هذا الإجراء.')) return;
+      store.reset();
+      showToast('تمت إعادة التعيين، جاري إعادة التحميل...');
+      setTimeout(function () { location.reload(); }, 1000);
+    });
+
+    /* ====================================================
+       PERSIST — save current `data` object to localStorage
+       ==================================================== */
+    function persist() {
+      const ok = store.save(data);
+      refreshOverviewCounts();
+      if (ok) {
+        showToast('تم حفظ التغييرات بنجاح');
+      } else {
+        showToast('حدث خطأ أثناء الحفظ', true);
+      }
+    }
+  }
+
+})();
+</script>
+</body>
+</html>
